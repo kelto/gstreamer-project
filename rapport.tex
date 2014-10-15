@@ -1,0 +1,52 @@
+\documentclass[10pt,a4paper]{article}
+\usepackage{xcolor}
+\usepackage[utf8]{inputenc}
+\usepackage[french]{babel}
+\usepackage[T1]{fontenc}
+\usepackage{amsmath}
+\usepackage{amsfonts}
+\usepackage{amssymb}
+\usepackage{listings}
+
+\title{OIM\\ Rapport de Projet 2}
+\date{}
+
+\input{/home/kelto/Documents/cours/LaTexTemplate/templates/listings.tex }
+
+\begin{document}
+\maketitle
+
+\part*{Ligne de commande}
+\section*{Question 1}
+Format avi: 
+Format OGV:
+Format Vorbis:
+Format Theora:
+\section*{Question 2}
+
+La première commande permet de lire le fichier video.ogv avec son et vidéo.
+\begin{lstlisting}
+gst-launch filesrc location=video.ogv ! oggdemux name=demux demux. ! queue ! theoradec ! autovideosink demux. ! queue ! vorbisdec ! autoaudiosink 
+\end{lstlisting}
+
+Cette seconde commande permet de lire le flux vidéo du fichier video.ogv avec le flux audio du fichier cranberries.mp3 fourni
+\begin{lstlisting}
+gst-launch filesrc location=video.ogv ! oggdemux name=demux demux. ! queue ! theoradec ! autovideosink filesrc location=cranberries.mp3 ! queue ! mad  ! autoaudiosink
+\end{lstlisting}
+
+\section*{Question 3}
+
+\begin{lstlisting}
+gst-launch subtitleoverlay name=overlay ! autovideosink  filesrc location=video.ogv ! oggdemux name=demux demux. ! queue ! theoradec ! overlay. demux. ! queue ! vorbisdec ! autoaudiosink filesrc location=video.srt ! subparse subtitle-encoding=UTF-8 ! overlay.
+
+\end{lstlisting}
+
+\section*{Question 4}
+
+\begin{lstlisting}
+gst-launch subtitleoverlay name=overlay ! theoraenc ! oggmux name=muxer ! filesink location=video_soustitres_partiel.ogv  filesrc location=video.ogv ! oggdemux name=demux demux. ! queue ! theoradec ! overlay. filesrc location=cranberries.mp3 ! queue ! mad ! audioconvert ! vorbisenc ! muxer. filesrc location=video.srt ! subparse subtitle-encoding=UTF-8 ! overlay.
+
+
+\end{lstlisting}
+
+\end{document}
