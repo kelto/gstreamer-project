@@ -9,7 +9,7 @@ typedef struct _player
     GstElement * subOverlay;
     GstElement * sink;
     GstElement * volume;
-    gboolean subtitle;
+    gboolean silent;
 }Player;
 
 Player * get_video_player(const char * filename);
