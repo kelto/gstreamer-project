@@ -1,0 +1,5 @@
+Gestion propre des elements :
+    - Utilisation d'une structure player avec :
+        * le pipeline : pour gerer lecture / pause
+        * le videosink : pour gerer l'affichage avec GTK
+        * l'overlay : pour changer la propriete silent des sous titre
