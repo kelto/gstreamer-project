@@ -35,7 +35,20 @@ static void play_cb(GtkButton * button, Player * player)
 {
     gst_element_set_state ((player->pipeline), GST_STATE_PLAYING);
 }
+void toogle_subtitle(GtkButton * button,Player * player)
+{
+    player->subtitle = ! player->subtitle;
+    if(player->subtitle)
+    {
+        printf("subtitle non silent\n");
+        g_object_set(G_OBJECT(player->subOverlay), "silent", FALSE, NULL);
+    }
+    else {
+        printf("subtitle silent\n");
+        g_object_set(G_OBJECT(player->subOverlay), "silent", TRUE, NULL);
+    }
 
+}
 static void get_ui(int argc, char * argv[], Player * player)
 {
     GtkWidget * main_window,
@@ -46,11 +59,14 @@ static void get_ui(int argc, char * argv[], Player * player)
               *subLabel,
               *hbox,
               *vbox;
+    printf("init\n");
     gtk_init(&argc, &argv);
+    printf("ui 1\n");
 
     main_window = gtk_window_new(GTK_WINDOW_TOPLEVEL);
     g_signal_connect(main_window,"destroy", G_CALLBACK(destroy), player);
 
+    printf("ui 2\n");
     video = gtk_drawing_area_new();
     gtk_widget_set_size_request(video,400,200);
     // mise en place d'un double buffer (eviter scintillement)
@@ -59,17 +75,21 @@ static void get_ui(int argc, char * argv[], Player * player)
 
     g_signal_connect(video,"realize", G_CALLBACK(realize),player);
     /*g_signal_connect(video,"expose_event", G_CALLBACK(expose_cb), NULL);*/
+    printf("ui 3\n");
 
     play = gtk_button_new_from_stock(GTK_STOCK_MEDIA_PLAY);
     g_signal_connect(G_OBJECT(play),"clicked", G_CALLBACK(play_cb),player);
 
+    printf("ui 4\n");
     pause = gtk_button_new_from_stock(GTK_STOCK_MEDIA_PAUSE);
     g_signal_connect(G_OBJECT(pause),"clicked", G_CALLBACK(pause_cb),player);
 
+    printf("ui 5\n");
     subToogle = gtk_button_new();
     subLabel = gtk_label_new("subtitle");
     gtk_container_add(GTK_CONTAINER(subToogle), subLabel);
     g_signal_connect(G_OBJECT(subToogle), "clicked", G_CALLBACK(toogle_subtitle), player);
+    printf("ui 6\n");
 
     vbox = gtk_vbox_new(FALSE,0);
     hbox = gtk_hbox_new(FALSE,0);
@@ -117,13 +137,16 @@ int main (int argc, char *argv[])
             g_printerr ("Usage: %s <Ogg/Vorbis filename>\n", argv[0]);
             return -1;
     }
-
+    printf("about to create ui\n");
     get_ui(argc,argv, player);
+    printf("ui created\n");
     /* passage a l'etat "playing" du pipeline */
     g_print ("Lecture de : %s\n", argv[1]);
     /*g_idle_add(set_start,pipeline);*/
     /*gst_element_set_state (pipeline, GST_STATE_PLAYING);*/
+    printf("about to start\n");
     start(player, window_handle);
+
 
     /* Iteration */
     g_print ("En cours...\n");

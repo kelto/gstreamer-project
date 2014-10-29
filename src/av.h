@@ -8,6 +8,7 @@ typedef struct _player
     GstElement * pipeline;
     GstElement * subOverlay;
     GstElement * sink;
+    GstElement * volume;
     gboolean subtitle;
 }Player;
 
@@ -16,7 +17,6 @@ int add_subtitle( GstElement * pipeline, const char * filename);
 Player * get_video_subtitle_player(const char * filename, const char * sub_name);
 void start(Player * player, guintptr window_handle );
 void stop(Player * player);
-void toogle_subtitle(Player * player);
 
 #endif
 

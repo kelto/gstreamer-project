@@ -97,6 +97,7 @@ Player * get_video_subtitle_player(const char * filename, const char * sub_name)
 
     video_queue = gst_element_factory_make("queue", "video_queue");
     audio_queue = gst_element_factory_make("queue", "audio_queue");
+    /*player->volume = gst_element_factory_make("volume", "volume");*/
 
     audio_sink     = gst_element_factory_make ("autoaudiosink", "audio-output");
     /*video_sink     = gst_element_factory_make ("autovideosink", "video-output");*/
@@ -108,7 +109,7 @@ Player * get_video_subtitle_player(const char * filename, const char * sub_name)
     player->subOverlay = gst_element_factory_make("subtitleoverlay", "overlay");
 
     if (!player->pipeline || !source || !magic || !audio_sink || !player->sink || !video_queue || !audio_queue || !sub_source
-            || !parser || !player->subOverlay) {
+            || !parser || !player->subOverlay ) {
         g_printerr ("One element could not be created. Exiting.\n");
         return NULL;
     }
@@ -136,8 +137,7 @@ Player * get_video_subtitle_player(const char * filename, const char * sub_name)
 
     g_signal_connect (magic, "pad-added", G_CALLBACK (on_pad_added), video_queue);
 
-    /*g_signal_connect(parser, "pad-added", G_CALLBACK (on_pad_added), overlay);*/
-    //gst_element_link_pads(parser,NULL, overlay,NULL);
+    printf("created\n");
 
     player->subtitle = TRUE;
     return player;
@@ -172,27 +172,6 @@ static gboolean bus_call (GstBus *bus, GstMessage *msg, gpointer data)
       break;
   }
   return TRUE;
-}
-
-void toogle_subtitle(Player * player)
-{
-    printf("youhou\n");
-    printf("passed\n");
-    if(player->subtitle)
-        player->subtitle = FALSE;
-    else {
-        player->subtitle = TRUE;
-    }
-    printf("test\n");
-    g_assert(G_IS_OBJECT(player->subOverlay));
-    printf("youhou 2\n");
-    if(player->subOverlay)
-        printf("not null\n");
-    else {
-        printf("null\n");
-    }
-    g_object_set(G_OBJECT(player->subOverlay), "silent", player->subtitle, NULL);
-    printf("youhou 3\n");
 }
 
 void start(Player *player, guintptr window_handle )
