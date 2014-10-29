@@ -34,15 +34,15 @@ Player * get_video_player(const char * filename)
 
     source   = gst_element_factory_make ("filesrc",       "file-source");
     video_queue = gst_element_factory_make("queue", "video_queue");
+    player->volume = gst_element_factory_make("volume", "volume");
     audio_queue = gst_element_factory_make("queue", "audio_queue");
     magic   = gst_element_factory_make ("decodebin",       "magic");
     audio_sink     = gst_element_factory_make ("autoaudiosink", "audio-output");
-    /*video_sink     = gst_element_factory_make ("autovideosink", "video-output");*/
     player->sink     = gst_element_factory_make ("xvimagesink", "video-output");
     player->subOverlay = NULL;
     // inutile puisque nous testerons uniquement si subOverlay est NULL
 
-    if (!player->pipeline || !source || !magic || !audio_sink || !player->sink || !video_queue || !audio_queue) {
+    if (!player->pipeline || !source || !magic || !player->volume || !audio_sink || !player->sink || !video_queue || !audio_queue) {
         g_printerr ("One element could not be created. Exiting.\n");
         return NULL;
     }
@@ -55,12 +55,12 @@ Player * get_video_player(const char * filename)
     /* on rajoute tous les elements dans le pipeline */
     /* file-source | ogg-demuxer | vorbis-video_queue | converter | alsa-output */
     gst_bin_add_many (GST_BIN (player->pipeline),
-            source, magic, video_queue,audio_queue, player->sink, audio_sink , NULL);
+            source, magic, video_queue,audio_queue, player->volume, player->sink, audio_sink , NULL);
 
     /* On relie les elements entre eux */
     /* file-source -> ogg-demuxer ~> vorbis-video_queue -> converter -> alsa-output */
     gst_element_link (source, magic);
-    gst_element_link_many (audio_queue, audio_sink, NULL);
+    gst_element_link_many (audio_queue, player->volume, audio_sink, NULL);
     gst_element_link_many (video_queue, player->sink, NULL);
     g_signal_connect (magic, "pad-added", G_CALLBACK (on_pad_added), audio_queue);
     g_signal_connect (magic, "pad-added", G_CALLBACK (on_pad_added), video_queue);
@@ -89,16 +89,15 @@ Player * get_video_subtitle_player(const char * filename, const char * sub_name)
     source   = gst_element_factory_make ("filesrc",       "file-source");
     video_queue = gst_element_factory_make("queue", "video_queue");
     audio_queue = gst_element_factory_make("queue", "audio_queue");
+    player->volume = gst_element_factory_make("volume", "volume");
     player->subOverlay = gst_element_factory_make("subtitleoverlay", "subOverlay");
     sub_source = gst_element_factory_make("filesrc", "sub_source");
     parser = gst_element_factory_make("subparse", "parser");
     magic   = gst_element_factory_make ("decodebin",       "magic");
     audio_sink     = gst_element_factory_make ("autoaudiosink", "audio-output");
-    /*video_sink     = gst_element_factory_make ("autovideosink", "video-output");*/
     player->sink     = gst_element_factory_make ("xvimagesink", "video-output");
-    // inutile puisque nous testerons uniquement si subOverlay est NULL
 
-    if (!player->pipeline || !source || !magic || !audio_sink || !player->subOverlay || !sub_source
+    if (!player->pipeline || !source || !magic || !player->volume || !audio_sink || !player->subOverlay || !sub_source
             || !parser || !player->sink || !video_queue || !audio_queue) {
         g_printerr ("One element could not be created. Exiting.\n");
         return NULL;
@@ -113,12 +112,13 @@ Player * get_video_subtitle_player(const char * filename, const char * sub_name)
     /* on rajoute tous les elements dans le pipeline */
     /* file-source | ogg-demuxer | vorbis-video_queue | converter | alsa-output */
     gst_bin_add_many (GST_BIN (player->pipeline),
-            source, magic, video_queue,audio_queue,sub_source, parser,player->subOverlay, player->sink, audio_sink , NULL);
+            source, magic, video_queue,player->volume,
+            audio_queue,sub_source, parser,player->subOverlay, player->sink, audio_sink , NULL);
 
     /* On relie les elements entre eux */
     /* file-source -> ogg-demuxer ~> vorbis-video_queue -> converter -> alsa-output */
     gst_element_link (source, magic);
-    gst_element_link_many (audio_queue, audio_sink, NULL);
+    gst_element_link_many (audio_queue,player->volume, audio_sink, NULL);
     gst_element_link_many(sub_source, parser, player->subOverlay, NULL);
     gst_element_link_many (video_queue, player->subOverlay,player->sink, NULL);
     g_signal_connect (magic, "pad-added", G_CALLBACK (on_pad_added), audio_queue);
