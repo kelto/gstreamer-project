@@ -18,6 +18,13 @@ static void on_pad_added (GstElement *element, GstPad *pad, gpointer    data)
     gst_object_unref (sinkpad);
 }
 
+/* Fonction interne qui ne doit pas etre utilise
+ * pour creer un Player (la fonction est donc static)
+ * Cette fonction regroupe les elements communs aux lecteurs
+ * video avec et sans sous-titres.
+ * Elle renvoie l'element qui pourra etre utilise comme sink
+ * a la sortie video des autres elements (celui est relie au video sink)
+ */
 static GstElement * init_player(Player * player, const char * filename)
 {
     GstElement  *source, *decode, *video_queue, *audio_queue,  *audio_sink;
@@ -60,6 +67,7 @@ static GstElement * init_player(Player * player, const char * filename)
     g_signal_connect (decode, "pad-added", G_CALLBACK (on_pad_added), audio_queue);
     g_signal_connect (decode, "pad-added", G_CALLBACK (on_pad_added), video_queue);
 
+    /*par defaut les sous-titres sont affiches*/
     player->silent = FALSE;
 
     return video_queue;
@@ -111,7 +119,6 @@ int init_video_player_subtitle(Player * player, const char * filename, const cha
     gst_element_link_many(sub_source, parser, player->subOverlay, NULL);
     gst_element_link_many (video_queue, player->subOverlay,player->sink, NULL);
 
-    player->silent = FALSE;
     return 0;
 }
 
@@ -165,6 +172,9 @@ void player_start(Player *player)
 
     GstBus *bus;
     bus = gst_pipeline_get_bus (GST_PIPELINE (player->pipeline));
+    /* dernier argument a NULL : nous utilisons la boucle de defaut
+     * que gtk utilise.
+     */
     gst_bus_add_watch (bus, bus_call, NULL);
     gst_object_unref (bus);
     player_play(player);
