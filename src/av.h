@@ -3,6 +3,10 @@
 #include <gst/gst.h>
 #include <glib.h>
 
+/*
+ * Structure stockant les elements necessaire a la lecture
+ * et aux differentes fonctionnalites.
+ * */
 typedef struct _player
 {
     GstElement * pipeline;
